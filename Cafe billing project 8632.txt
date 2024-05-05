@@ -1,0 +1,1321 @@
+///////////////////////////////////////SPICY SUGAR CAFE////////////////////////////////////////////////////////
+
+
+///////////////////////MARYAM AMIN 2022-AG-8643 /////////////////////////////////////
+/////////////////////RADIFA NAVEED 2022AG-8634//////////////////////////////////////
+////////////////////ARBISH MUNAWAR 2022-AG-8632////////////////////////////////////
+///////////////////WARISHA KHALIL  2022-8573///////////////////////////////////////
+
+
+
+
+
+///////////////////////////////////FORM1///////////////////////////////////////////////////////////////
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.OleDb;
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
+namespace CAFE_PROJECT
+{
+    public partial class Form1 : Form
+    {
+        OleDbConnection conn;
+        OleDbCommand cmd;
+        OleDbDataAdapter adapter;
+        OleDbDataReader reader;
+        OleDbConnection connection;
+        DataTable dt;
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+        
+
+        private void LABEL5_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            form2 form = new form2();
+            form.Show();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            // Connection string for the database
+            string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=DATAOFUSER1.accdb";
+            string username = textBox1.Text;
+            string password = textBox2.Text;
+
+            // Check if the username or password fields are empty
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                MessageBox.Show("Please Enter both username and password.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                // Establish connection to the database
+                using (OleDbConnection connection = new OleDbConnection(connectionString))
+                {
+                    // Open the connection
+                    connection.Open();
+
+                    // Define SQL query to retrieve password for the given username
+                    string query = "SELECT PASSCODE FROM userdata WHERE USERNAME = @Username";
+
+                    // Create a command object
+                    using (OleDbCommand command = new OleDbCommand(query, connection))
+                    {
+                        // Add parameter for username
+                        command.Parameters.AddWithValue("@Username", username);
+
+                        // Execute the query and retrieve the password from the database
+                        object result = command.ExecuteScalar();
+
+                        if (result != null && result.ToString() == password)
+                        {
+                            // If password matches, login successful
+                            MessageBox.Show("Login successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                            Form6 form6 = new Form6();
+                            form6.Show();
+                            this.Hide();
+                        }
+                        else
+                        {
+                            // If password does not match, display error message
+                            MessageBox.Show("Invalid username or password.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error logging in: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+
+
+///////////////////////////////////////FORM2/////////////////////////////////////////
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.OleDb;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
+namespace CAFE_PROJECT
+{
+    public partial class form2 : Form
+    {
+        OleDbConnection conn;
+        OleDbConnection conn2;
+        OleDbCommand cmd;
+        OleDbCommand cmd2;
+        OleDbDataAdapter adapter;
+        OleDbDataAdapter adapter2;
+        OleDbDataReader reader;
+        OleDbConnection connection;
+        DataTable dt;
+        DataTable dt2;
+
+        DataTable dataTable;
+        public form2()
+        {
+            InitializeComponent();
+            if (!DesignMode)
+            {
+                // Initialize the DataTable
+                dataTable = new DataTable();
+
+                // Add columns to the DataTable
+                dataTable.Columns.Add("Item_ID", typeof(string));
+                dataTable.Columns.Add("Name", typeof(string));
+                dataTable.Columns.Add("Category", typeof(string));
+                dataTable.Columns.Add("Price", typeof(string));
+                
+            }
+        }
+        void GetITEMS()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Manageitems1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT *FROM itemlist ", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+
+        void GetDATA2()
+        {
+
+            conn2 = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=PLACEORDER.accdb");
+            dt2 = new DataTable();
+            adapter2 = new OleDbDataAdapter("SELECT * FROM OrderData", conn2); // Enclose 'order' in square brackets
+            conn2.Open();
+            adapter2.Fill(dt2);
+            dataGridView2.DataSource = dt2;
+            conn2.Close();
+        }
+        void Getfilltercategory()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Manageitems1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT *FROM itemlist  WHERE CATEGORY='" + comboBox1.SelectedItem.ToString() + "'", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+
+        private void LABEL5_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+        decimal grand_total = 0;
+
+        //decimal totalPrice = 0;
+        DataTable table = new DataTable();
+
+        int flag = 0;
+        int sum = 0;
+
+       
+
+        // Initialize total price to zero
+        
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            // Check if a row is selected in dataGridView1
+            if (selectedRowIndex >= 0)
+            {
+                // Get the selected row from dataGridView1
+                DataGridViewRow selectedRow = dataGridView1.Rows[selectedRowIndex];
+
+                // Extract data from the selected row
+                string item_ID = selectedRow.Cells[0].Value.ToString();
+                string name = selectedRow.Cells[1].Value.ToString();
+                string category = selectedRow.Cells[2].Value.ToString();
+                string priceString = selectedRow.Cells[3].Value.ToString();
+
+                // Check if quantity is provided
+                if (string.IsNullOrWhiteSpace(textBox3.Text))
+                {
+                    MessageBox.Show("Please enter a quantity.");
+                    return;
+                }
+
+                // Parse the price and quantity
+                decimal price;
+                if (!decimal.TryParse(priceString, out price))
+                {
+                    MessageBox.Show("Invalid price.");
+                    return;
+                }
+
+                int quantity;
+                if (!int.TryParse(textBox3.Text, out quantity) || quantity <= 0)
+                {
+                    MessageBox.Show("Invalid quantity.");
+                    return;
+                }
+
+                decimal totalPrice = price * quantity;
+                grand_total = grand_total + totalPrice;
+                label2.Text = "Rs  :  " + grand_total;
+
+                // Add a new row to the dataTable
+                DataRow newRow = dataTable.NewRow();
+                newRow["Item_ID"] = item_ID;
+                newRow["Name"] = name;
+                newRow["Category"] = category;
+                newRow["Price"] = totalPrice.ToString(); // Show the total price
+                dataTable.Rows.Add(newRow);
+               // CalculateTotalPrice();
+
+                // Refresh dataGridView2 to reflect the changes
+                dataGridView2.DataSource = null;
+                dataGridView2.DataSource = dataTable;    
+                textBox3.Text = "";
+                // Calculate the total price
+               
+
+                //  label2.Text = "Rs  :  " + totalPrice;
+            }
+            else
+            {
+                MessageBox.Show("Please select a row in dataGridView1.");
+            }
+           
+            
+
+        }
+
+      /*  private void CalculateTotalPrice()
+        {
+        
+
+            // Iterate through all rows in dataGridView2
+            foreach (DataGridViewRow row in dataGridView2.Rows)
+            {
+                // Extract the price from the current row
+                if (row.Cells["Price"].Value != null)
+                {
+                    decimal price;
+                    if (decimal.TryParse(row.Cells["Price"].Value.ToString(), out price))
+                    {
+                        // Add the price to the total
+                        totalPrice += price;
+                    }
+                }
+            }
+
+            // Update the label2 text with the total price
+            label2.Text = "Total: Rs " + totalPrice.ToString();
+        }
+      */
+
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            flag = 1;
+           
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form1 Login =new Form1();
+            Login.Show();
+        }
+
+        private void form2_Load(object sender, EventArgs e)
+        {
+            GetITEMS();
+            label4.Text = DateTime.Today.Date.ToString();
+
+        }
+        int num = 0;
+        int total, qty;
+        string item_ID, name, category, price;
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            {
+                string query = "INSERT INTO listoforders (ORDERNUM, TOTALPRICE, SELLERNAME) VALUES (@ordernum, @tprice, @sellernam)";
+                using (conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb"))
+                {
+                    using (OleDbCommand cmd = new OleDbCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@ordernum", textBox1.Text);
+                        cmd.Parameters.AddWithValue("@tprice", label2.Text);
+                        cmd.Parameters.AddWithValue("@sellernam", textBox2.Text);
+
+                        try
+                        {
+                            conn.Open();
+                            cmd.ExecuteNonQuery();
+                            MessageBox.Show("ORDER IS PLACED");
+                            Gta();
+                        }
+                        catch (OleDbException ex)
+                        {
+                            MessageBox.Show("Error: " + ex.Message);
+                        }
+                        finally
+                        {
+                            conn.Close();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Getfilltercategory();    
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Update the selected row index
+            selectedRowIndex = e.RowIndex;
+
+
+        }
+
+        int selectedRowIndex = -1;
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            GetITEMS();
+            Gta();
+        }
+        void Gta()
+        {
+            using (conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb;Mode=Share Deny None"))
+            {
+                dt = new DataTable();
+                adapter = new OleDbDataAdapter("SELECT * FROM listoforders ", conn);
+                conn.Open();
+                adapter.Fill(dt);
+                conn.Close();
+            }
+        }
+    }
+}
+
+/////////////////////////////////////////FORM3//////////////////////////////////////////////////
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.OleDb;
+using System.Windows.Forms;
+using System.Diagnostics;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Reflection.Emit;
+
+namespace CAFE_PROJECT
+{
+    public partial class Form3 : Form
+    {
+        OleDbConnection conn;
+        OleDbConnection conn2;
+        OleDbCommand cmd;
+        OleDbCommand cmd2;
+        OleDbDataAdapter adapter;
+        OleDbDataAdapter adapter2;
+        OleDbDataReader reader;
+        OleDbConnection connection;
+        DataTable dt;
+        DataTable dt2;
+
+        DataTable dataTable;
+
+        public Form3()
+        {
+            InitializeComponent();
+            if (!DesignMode)
+            {
+                // Initialize the DataTable
+                dataTable = new DataTable();
+
+                // Add columns to the DataTable
+                dataTable.Columns.Add("Item_ID", typeof(string));
+                dataTable.Columns.Add("Name", typeof(string));
+                dataTable.Columns.Add("Category", typeof(string));
+                dataTable.Columns.Add("Price", typeof(string));
+            }
+        }
+        void GetDATA()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT * FROM listoforders ", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+        void GetITEMS()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Manageitems1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT *FROM itemlist ", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+        void Getfilltercategory()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Manageitems1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT *FROM itemlist  WHERE CATEGORY='" + comboBox1.SelectedItem.ToString() + "'", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+
+
+        void GetDATA2()
+        {
+
+            conn2 = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=PLACEORDER.accdb");
+            dt2 = new DataTable();
+            adapter2 = new OleDbDataAdapter("SELECT * FROM OrderData", conn2); // Enclose 'order' in square brackets
+            conn2.Open();
+            adapter2.Fill(dt2);
+            dataGridView2.DataSource = dt2;
+            conn2.Close();
+        }
+
+
+        private void LABEL5_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form1 Login = new Form1();
+            Login.Show();
+        }
+
+
+
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+
+            {
+                string query = "INSERT INTO listoforders (ORDERNUM, TOTALPRICE, SELLERNAME) VALUES (@ordernum, @tprice, @sellernam)";
+                using (conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb"))
+                {
+                    using (OleDbCommand cmd = new OleDbCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@ordernum", textBox1.Text);
+                        cmd.Parameters.AddWithValue("@tprice",  label2.Text);
+                        cmd.Parameters.AddWithValue("@sellernam", textBox2.Text);
+
+                        try
+                        {
+                            conn.Open();
+                            cmd.ExecuteNonQuery();
+                            MessageBox.Show("ORDER IS PLACED");
+                            Gta();
+                        }
+                        catch (OleDbException ex)
+                        {
+                            MessageBox.Show("Error: " + ex.Message);
+                        }
+                        finally
+                        {
+                            conn.Close();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
+        /*  int num = 0;
+          int total, qty;
+          string item_ID,name,category,price;
+
+          int selectedRowIndex = -1;*/
+
+        decimal grand_total=0;
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Update the selected row index
+            selectedRowIndex = e.RowIndex;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            // Check if a row is selected in dataGridView1
+            if (selectedRowIndex >= 0)
+            {
+                // Get the selected row from dataGridView1
+                DataGridViewRow selectedRow = dataGridView1.Rows[selectedRowIndex];
+
+                // Extract data from the selected row
+                string item_ID = selectedRow.Cells[0].Value.ToString();
+                string name = selectedRow.Cells[1].Value.ToString();
+                string category = selectedRow.Cells[2].Value.ToString();
+                string priceString = selectedRow.Cells[3].Value.ToString();
+
+                // Check if quantity is provided
+                if (string.IsNullOrWhiteSpace(textBox3.Text))
+                {
+                    MessageBox.Show("Please enter a quantity.");
+                    return;
+                }
+
+                // Parse the price and quantity
+                decimal price;
+                if (!decimal.TryParse(priceString, out price))
+                {
+                    MessageBox.Show("Invalid price.");
+                    return;
+                }
+
+                int quantity;
+                if (!int.TryParse(textBox3.Text, out quantity) || quantity <= 0)
+                {
+                    MessageBox.Show("Invalid quantity.");
+                    return;
+                }
+
+                // Calculate the total price
+               decimal totalPrice = price * quantity;
+               grand_total = grand_total + totalPrice;
+                label2.Text = "Rs  :  " + grand_total;
+
+             
+
+             
+                // Add a new row to the dataTable
+                DataRow newRow = dataTable.NewRow();
+                newRow["Item_ID"] = item_ID;
+                newRow["Name"] = name;
+                newRow["Category"] = category;
+                newRow["Price"] = totalPrice.ToString(); // Show the total price
+                dataTable.Rows.Add(newRow);
+
+                // Refresh dataGridView2 to reflect the changes
+                dataGridView2.DataSource = null;
+                dataGridView2.DataSource = dataTable;
+                textBox3.Text = "";
+            }
+            else
+            {
+                MessageBox.Show("Please select a row in dataGridView1.");
+            }
+
+
+
+        }
+
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            flag = 1;
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+
+
+        DataTable table = new DataTable();
+
+        int flag = 0;
+        int totalPrice = 0;
+
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Getfilltercategory();
+        }
+
+        private void comboBox1_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            Getfilltercategory();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            GetITEMS();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form4 form = new Form4();
+            form.Show();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form6 form = new Form6();
+            form.Show();
+
+        }
+        int num = 0;
+        int total, qty;
+        string item_ID, name, category, price;
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form5 form = new Form5();
+            form.Show();
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        int selectedRowIndex = -1;
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            GetITEMS();
+            GetDATA2();
+           
+            Gta();
+        }
+        void Gta()
+        {
+            using (conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb;Mode=Share Deny None"))
+            {
+                dt = new DataTable();
+                adapter = new OleDbDataAdapter("SELECT * FROM listoforders ", conn);
+                conn.Open();
+                adapter.Fill(dt);
+                conn.Close();
+            }
+        }
+    }
+}
+
+
+
+///////////////////////////////////////////FORM4///////////////////////////////////////////////////////
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.OleDb;
+using System.Windows.Forms;
+using System.Diagnostics;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Reflection.Emit;
+
+namespace CAFE_PROJECT
+{
+    public partial class Form3 : Form
+    {
+        OleDbConnection conn;
+        OleDbConnection conn2;
+        OleDbCommand cmd;
+        OleDbCommand cmd2;
+        OleDbDataAdapter adapter;
+        OleDbDataAdapter adapter2;
+        OleDbDataReader reader;
+        OleDbConnection connection;
+        DataTable dt;
+        DataTable dt2;
+
+        DataTable dataTable;
+
+        public Form3()
+        {
+            InitializeComponent();
+            if (!DesignMode)
+            {
+                // Initialize the DataTable
+                dataTable = new DataTable();
+
+                // Add columns to the DataTable
+                dataTable.Columns.Add("Item_ID", typeof(string));
+                dataTable.Columns.Add("Name", typeof(string));
+                dataTable.Columns.Add("Category", typeof(string));
+                dataTable.Columns.Add("Price", typeof(string));
+            }
+        }
+        void GetDATA()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT * FROM listoforders ", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+        void GetITEMS()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Manageitems1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT *FROM itemlist ", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+        void Getfilltercategory()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Manageitems1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT *FROM itemlist  WHERE CATEGORY='" + comboBox1.SelectedItem.ToString() + "'", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+
+
+        void GetDATA2()
+        {
+
+            conn2 = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=PLACEORDER.accdb");
+            dt2 = new DataTable();
+            adapter2 = new OleDbDataAdapter("SELECT * FROM OrderData", conn2); // Enclose 'order' in square brackets
+            conn2.Open();
+            adapter2.Fill(dt2);
+            dataGridView2.DataSource = dt2;
+            conn2.Close();
+        }
+
+
+        private void LABEL5_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form1 Login = new Form1();
+            Login.Show();
+        }
+
+
+
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+
+            {
+                string query = "INSERT INTO listoforders (ORDERNUM, TOTALPRICE, SELLERNAME) VALUES (@ordernum, @tprice, @sellernam)";
+                using (conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb"))
+                {
+                    using (OleDbCommand cmd = new OleDbCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@ordernum", textBox1.Text);
+                        cmd.Parameters.AddWithValue("@tprice",  label2.Text);
+                        cmd.Parameters.AddWithValue("@sellernam", textBox2.Text);
+
+                        try
+                        {
+                            conn.Open();
+                            cmd.ExecuteNonQuery();
+                            MessageBox.Show("ORDER IS PLACED");
+                            Gta();
+                        }
+                        catch (OleDbException ex)
+                        {
+                            MessageBox.Show("Error: " + ex.Message);
+                        }
+                        finally
+                        {
+                            conn.Close();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
+        /*  int num = 0;
+          int total, qty;
+          string item_ID,name,category,price;
+
+          int selectedRowIndex = -1;*/
+
+        decimal grand_total=0;
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Update the selected row index
+            selectedRowIndex = e.RowIndex;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            // Check if a row is selected in dataGridView1
+            if (selectedRowIndex >= 0)
+            {
+                // Get the selected row from dataGridView1
+                DataGridViewRow selectedRow = dataGridView1.Rows[selectedRowIndex];
+
+                // Extract data from the selected row
+                string item_ID = selectedRow.Cells[0].Value.ToString();
+                string name = selectedRow.Cells[1].Value.ToString();
+                string category = selectedRow.Cells[2].Value.ToString();
+                string priceString = selectedRow.Cells[3].Value.ToString();
+
+                // Check if quantity is provided
+                if (string.IsNullOrWhiteSpace(textBox3.Text))
+                {
+                    MessageBox.Show("Please enter a quantity.");
+                    return;
+                }
+
+                // Parse the price and quantity
+                decimal price;
+                if (!decimal.TryParse(priceString, out price))
+                {
+                    MessageBox.Show("Invalid price.");
+                    return;
+                }
+
+                int quantity;
+                if (!int.TryParse(textBox3.Text, out quantity) || quantity <= 0)
+                {
+                    MessageBox.Show("Invalid quantity.");
+                    return;
+                }
+
+                // Calculate the total price
+               decimal totalPrice = price * quantity;
+               grand_total = grand_total + totalPrice;
+                label2.Text = "Rs  :  " + grand_total;
+
+             
+
+             
+                // Add a new row to the dataTable
+                DataRow newRow = dataTable.NewRow();
+                newRow["Item_ID"] = item_ID;
+                newRow["Name"] = name;
+                newRow["Category"] = category;
+                newRow["Price"] = totalPrice.ToString(); // Show the total price
+                dataTable.Rows.Add(newRow);
+
+                // Refresh dataGridView2 to reflect the changes
+                dataGridView2.DataSource = null;
+                dataGridView2.DataSource = dataTable;
+                textBox3.Text = "";
+            }
+            else
+            {
+                MessageBox.Show("Please select a row in dataGridView1.");
+            }
+
+
+
+        }
+
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            flag = 1;
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+
+
+        DataTable table = new DataTable();
+
+        int flag = 0;
+        int totalPrice = 0;
+
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Getfilltercategory();
+        }
+
+        private void comboBox1_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            Getfilltercategory();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            GetITEMS();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form4 form = new Form4();
+            form.Show();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form6 form = new Form6();
+            form.Show();
+
+        }
+        int num = 0;
+        int total, qty;
+        string item_ID, name, category, price;
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form5 form = new Form5();
+            form.Show();
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        int selectedRowIndex = -1;
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            GetITEMS();
+            GetDATA2();
+           
+            Gta();
+        }
+        void Gta()
+        {
+            using (conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb;Mode=Share Deny None"))
+            {
+                dt = new DataTable();
+                adapter = new OleDbDataAdapter("SELECT * FROM listoforders ", conn);
+                conn.Open();
+                adapter.Fill(dt);
+                conn.Close();
+            }
+        }
+    }
+}
+
+
+//////////////////////////////////////////////////FORM5///////////////////////////////////////////////
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.OleDb;
+using System.Windows.Forms;
+
+namespace CAFE_PROJECT
+{
+    public partial class Form5 : Form
+    {
+        OleDbConnection conn;
+        OleDbCommand cmd;
+        OleDbDataAdapter adapter;
+        OleDbDataReader reader;
+        OleDbConnection connection;
+        DataTable dt;
+        public Form5()
+        {
+            InitializeComponent();
+        }
+        private DataTable GetData()
+        {
+            string connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=LISTOFORDERS1.accdb";
+            using (OleDbConnection connection = new OleDbConnection(connectionString))
+            {
+                string query = "SELECT * FROM listoforders";
+                using (OleDbCommand command = new OleDbCommand(query, connection))
+                {
+                    connection.Open();
+                    using (OleDbDataReader reader = command.ExecuteReader())
+                    {
+                        DataTable dataTable = new DataTable();
+                        dataTable.Load(reader);
+                        return dataTable;
+                    }
+                }
+            }
+        }
+
+        private void DisplayData()
+        {
+            DataTable dataTable = GetData();
+            dataGridView1.DataSource = dataTable;
+        }
+
+        private void Form5_Load(object sender, EventArgs e)
+        {
+            DisplayData();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form3 Login = new Form3();
+            Login.Show();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+           
+      
+        }
+  
+
+        private void printDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            
+
+           
+           
+
+
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+    }
+}
+
+///////////////////////////////////////////FORM6/////////////////////////////////////
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.OleDb;
+using System.Windows.Forms;
+
+namespace CAFE_PROJECT
+{
+    public partial class Form6 : Form
+    {
+        OleDbConnection conn;
+        OleDbCommand cmd;
+        OleDbDataAdapter adapter;
+        OleDbDataReader reader;
+        OleDbConnection connection;
+        DataTable dt;
+
+        public Form6()
+        {
+            InitializeComponent();
+
+        }
+
+        void GetDATA()
+        {
+            conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=DATAOFUSER1.accdb");
+            dt = new DataTable();
+            adapter = new OleDbDataAdapter("SELECT * FROM userdata ", conn);
+            conn.Open();
+            adapter.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+        }
+        private void label7_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form4 form = new Form4();
+            form.Show();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form1 Login = new Form1();
+            Login.Show();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form3 form = new Form3();
+            form.Show();
+        }
+
+        private void Form6_Load(object sender, EventArgs e)
+        {
+            
+            GetDATA();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string query = "INSERT INTO userdata(ID,USERNAME,PHONE,PASSCODE)" +
+                           "VALUES(@id, @Uname, @phone, @pw)";
+            cmd = new OleDbCommand(query, conn);
+            cmd.Parameters.AddWithValue("@id", textBox3.Text);
+            cmd.Parameters.AddWithValue("@Uname", textBox1.Text);
+            cmd.Parameters.AddWithValue("@phone", textBox4.Text);
+            cmd.Parameters.AddWithValue("@pw", textBox5.Text);
+            conn.Open();
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            MessageBox.Show("USERS DATA INSERTED SUCCESFULLY");
+            GetDATA();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            
+                String query = "DELETE FROM userdata WHERE ID=@id";
+                cmd = new OleDbCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id", Convert.ToInt32(textBox3.Text)); ////query part
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                conn.Close();
+                MessageBox.Show("Users Data Delete Sucessfully");
+                GetDATA();
+            
+        }
+
+        private void dataGridView1_CellEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            textBox3.Text = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+            textBox1.Text = dataGridView1.CurrentRow.Cells[1].Value.ToString();
+            textBox4.Text = dataGridView1.CurrentRow.Cells[2].Value.ToString();
+            textBox5.Text = dataGridView1.CurrentRow.Cells[3].Value.ToString();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            String query = "UPDATE userdata SET USERNAME= @Uname,PHONE=@phone,PASSCODE=@pw WHERE ID=@id";
+            cmd = new OleDbCommand(query, conn);
+            cmd.Parameters.AddWithValue("@Uname", textBox1.Text);
+            cmd.Parameters.AddWithValue("@phone", textBox4.Text);
+            cmd.Parameters.AddWithValue("@pw", textBox5.Text);
+            cmd.Parameters.AddWithValue("@id", Convert.ToInt32(textBox3.Text));
+            conn.Open();
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            MessageBox.Show(" Users Update Sccessfully data");
+            GetDATA();
+        }
+    }
+}
+
+
+
